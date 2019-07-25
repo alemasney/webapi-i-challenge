@@ -5,6 +5,10 @@ const server = express();
 
 server.use(express.json());
 
+server.get('/', (req, res) => {
+    res.send("Hello");
+})
+
 server.get('/api/users', ( req, res ) => {
     db.find()
         .then( user => {
@@ -20,7 +24,7 @@ server.post('/api/users', ( req, res ) => {
 
     db.insert(newUser)
         .then( addedUser => {
-            if(addedUser) {
+            if(addedUser.name && addedUser.bio) {
                 res.status(201).json({ success: true, addedUser });
             } else {
                 res.status(400).json({ success: false, errorMessage: "Please provide name and bio for the user." });
@@ -31,19 +35,19 @@ server.post('/api/users', ( req, res ) => {
          })
 });
 
-// server.get('/api/user/:id', ( req, res ) => {
-//     const { id } = req.params;
+server.get('/api/user/:id', ( req, res ) => {
+    const { id } = req.params;
 
-//     db.findById(id)
-//         .then( user => {
-//             if(user) {
-//                 res.status(200).json({ success: true, user })
-//             } else {
-//                 res.status(404).json({ success: false, message: "The user with the specified ID does not exist." })
-//             }
-//         })
-//         .catch(res.status(500).json({ success: false, error: "The user information could not be retrieved." }))
-// })
+    db.findById(id)
+        .then( user => {
+            if(user) {
+                res.status(200).json({ success: true, user })
+            } else {
+                res.status(404).json({ success: false, message: "The user with the specified ID does not exist." })
+            }
+        })
+        .catch(res.status(500).json({ success: false, error: "The user information could not be retrieved." }))
+})
 
 server.delete('/api/users/:id', ( req, res) => {
     const { id } = req.params;
@@ -65,7 +69,7 @@ server.put('/api/users/:id', (req, res) => {
 
     db.update(id, userInfo)
         .then( updated => {
-            if(updated) {
+            if(updated.name && updated.bio) {
                 res.status(200).json({ success: true, updated })
             } else {
                 res.status(400).json({ success: false, message: "The user with the specified ID does not exist."})
